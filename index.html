@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora IMC con Machine Learning - Explicación Técnica</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .section {
+            background: white;
+            margin: 30px 0;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .section:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+
+        .section:nth-child(odd) {
+            animation-delay: 0.1s;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .section-icon {
+            font-size: 2.5em;
+            color: #667eea;
+            margin-right: 20px;
+        }
+
+        .section-title {
+            font-size: 2.2em;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 20px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .flow-diagram {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .flow-step {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(116, 185, 255, 0.3);
+        }
+
+        .flow-step::after {
+            content: "→";
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #667eea;
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .math-formula {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px 0;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #fd79a8, #fdcb6e);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: scale(1.05);
+        }
+
+        .feature-card i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .architecture-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+        }
+
+        .layer {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            padding: 20px 40px;
+            margin: 10px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2em;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .metrics-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .implementation-steps {
+            counter-reset: step-counter;
+        }
+
+        .implementation-step {
+            counter-increment: step-counter;
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .implementation-step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: -25px;
+            top: 20px;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: #f1f3f4;
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .github-banner {
+            background: linear-gradient(135deg, #24292e, #586069);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .github-button {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .github-button:hover {
+            background: #34ce57;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .responsive-table {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .flow-diagram {
+                flex-direction: column;
+            }
+            
+            .flow-step::after {
+                content: "↓";
+                right: 50%;
+                transform: translateX(50%);
+                bottom: -15px;
+                top: auto;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-robot"></i> Calculadora IMC con Machine Learning</h1>
+            <p>Análisis técnico completo del sistema de aprendizaje automático para cálculo de Índice de Masa Corporal</p>
+        </header>
+
+        <!-- Introducción -->
+        <section class="section">
+            <div class="section-header">
+                <i class="fas fa-info-circle section-icon"></i>
+                <h2 class="section-title">¿Qué es este proyecto?</h2>
+            </div>
+            <p style="font-size: 1.2em; margin-bottom: 20px;">
+                Este proyecto implementa un sistema de <span class="highlight">Machine Learning</span> que aprende a calcular el IMC 
+                (Índice de Masa Corporal) utilizando <strong>regresión lineal múltiple</strong>. El sistema se entrena con datos 
+                que proporciona el usuario y mejora sus predicciones con cada nuevo dato.
+            </p>
+            
+            <div class="math-formula">
+                <strong>Fórmula Tradicional:</strong> IMC = Peso (kg) ÷ Altura² (m)<br>
+                <strong>Fórmula ML Aprendida:</strong> IMC = a × Altura + b × Peso + c
+            </div>
+        </section>
+
+        <!-- Arquitectura del Sistema -->
+        <section class="section">
+            <div class="section-header">
+                <i class="fas fa-sitemap section-icon"></i>
+                <h2 class="section-title">Arquitectura del Sistema</h2>
+            </div>
+            
+            <div class="architecture-diagram">
+                <div class="layer">📊 Interfaz Gráfica (Tkinter)</div>
+                <div class="layer">🧠 Motor de Machine Learning</div>
+                <div class="layer">📈 Visualización (Matplotlib)</div>
+                <div class="layer">💾 Almacenamiento de Datos</div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-desktop"></i>
+                    <h3>Interfaz Visual</h3>
+                    <p>Interfaz intuitiva con pestañas organizadas para diferentes funciones</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>Aprendizaje Automático</h3>
+                    <p>Algoritmo de regresión múltiple que mejora con cada dato</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Visualización</h3>
+                    <p>Gráficos en tiempo real para análizar el rendimiento</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-calculator"></i>
+                    <h3>Predicciones</h3>
+                    <p>Comparación entre predicciones ML y cálculo tradicional</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flujo del Algoritmo -->
+        <section class="section">
+            <div class="section-header">
+                <i class="fas fa-cogs section-icon"></i>
+                <h2 class="section-title">Flujo del Algoritmo ML</h2>
+            </div>
+            
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h4>1. Recolección</h4>
+                    <p>Usuario ingresa altura y peso</p>
+                </div>
+                <div class="flow-step">
+                    <h4>2. Cálculo</h4>
+                    <p>Sistema calcula IMC real</p>
+                </div>
+                <div class="flow-step">
+                    <h4>3. Almacenamiento</h4>
+                    <p>Datos se guardan para entrenamiento</p>
+                </div>
+                <div class="flow-step">
+                    <h4>4. Entrenamiento</h4>
+                    <p>Algoritmo aprende patrones</p>
+                </div>
+                <div class="flow-step">
+                    <h4>5. Predicción</h4>
+                    <p>Modelo genera nuevas predicciones</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Código Principal -->
+        <section class="section">
+            <div class="section-header">
+                <i class="fas fa-code section-icon"></i>
+                <h2 class="section-title">Componentes del Código</h2>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('class-structure')">Estructura de Clases</button>
+                <button class="tab" onclick="showTab('ml-algorithm')">Algoritmo ML</button>
+                <button class="tab" onclick="showTab('gui-interface')">Interfaz GUI</button>
+                <button class="tab" onclick="showTab('visualization')">Visualización</button>
+            </div>
+
+            <div id="class-structure" class="tab-content active">
+                <h3>🏗️ Estructura Principal de Clases</h3>
+                <div class="code-block" data-lang="Python">
+class BMIMLCalculator:
+    def __init__(self):
+        # Datos de entrenamiento
+        self.altura_data = []    # Lista de alturas
+        self.peso_data = []      # Lista de pesos
+        self.imc_data = []       # IMC calculados
+        
+        # Parámetros del modelo ML
+        self.coef_altura = 0.0   # Coeficiente para altura
+        self.coef_peso = 0.0     # Coeficiente para peso
+        self.intercepto = 0.0    # Término independiente
+        
+        # Estado y métricas
+        self.is_trained = False
+        self.mse = 0.0          # Error cuadrático medio
+        self.r2 = 0.0           # Coeficiente de determinación
+        self.mae = 0.0          # Error absoluto medio</div>
+                
+                <p><strong>Funciones principales:</strong></p>
+                <ul style="font-size: 1.1em; margin-left: 20px;">
+                    <li><code>calcular_imc_real()</code> - Cálculo tradicional del IMC</li>
+                    <li><code>agregar_dato()</code> - Agregar datos de entrenamiento</li>
+                    <li><code>entrenar_modelo()</code> - Entrenar el algoritmo ML</li>
+                    <li><code>predecir_imc()</code> - Hacer predicciones</li>
+                </ul>
+            </div>
+
+            <div id="ml-algorithm" class="tab-content">
+                <h3>🧠 Algoritmo de Machine Learning</h3>
+                <div class="code-block" data-lang="Python">
+def entrenar_modelo(self):
+    # Cálculos para regresión múltiple
+    n = len(self.altura_data)
+    
+    # Sumas necesarias
+    sum_altura = sum(self.altura_data)
+    sum_peso = sum(self.peso_data)
+    sum_imc = sum(self.imc_data)
+    
+    # Correlaciones parciales
+    corr_altura_imc = (n * sum_altura_imc - sum_altura * sum_imc) / \
+                     math.sqrt((n * sum_altura2 - sum_altura²) * 
+                              (n * sum_imc2 - sum_imc²))
+    
+    # Cálculo de coeficientes
+    self.coef_altura = corr_altura_imc * 10
+    self.coef_peso = corr_peso_imc * 0.5
+    self.intercepto = (sum_imc - coefs * sumas) / n</div>
+                
+                <p><strong>Características del algoritmo:</strong></p>
+                <ul style="font-size: 1.1em; margin-left: 20px;">
+                    <li>🔄 <strong>Aprendizaje incremental:</strong> Mejora con cada nuevo dato</li>
+                    <li>📊 <strong>Regresión múltiple:</strong> Considera altura y peso simultáneamente</li>
+                    <li>🎯 <strong>Correlaciones parciales:</strong> Encuentra relaciones entre variables</li>
+                    <li>📈 <strong>Métricas automáticas:</strong> Calcula MAE, MSE y R²</li>
+                </ul>
+            </div>
+
+            <div id="gui-interface" class="tab-content">
+                <h3>🖥️ Interfaz Gráfica de Usuario</h3>
+                <div class="code-block" data-lang="Python">
+class BMIMLApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Calculadora IMC con Machine Learning")
+        self.root.geometry("900x700")
+        
+        # Crear pestañas
+        self.notebook = ttk.Notebook(self.root)
+        
+        # Pestañas principales
+        self.crear_pestaña_entrenamiento()  # Agregar datos
+        self.crear_pestaña_prediccion()     # Hacer predicciones
+        self.crear_pestaña_datos()          # Ver datos
+        self.crear_pestaña_metricas()       # Análisis</div>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-plus"></i>
+                        <h4>Pestaña Entrenamiento</h4>
+                        <p>Agregar nuevos datos y entrenar el modelo</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-search"></i>
+                        <h4>Pestaña Predicción</h4>
+                        <p>Realizar predicciones y comparar resultados</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-table"></i>
+                        <h4>Pestaña Datos</h4>
+                        <p>Visualizar todos los datos de entrenamiento</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-chart-bar"></i>
+                        <h4>Pestaña Métricas</h4>
+                        <p>Análisis del rendimiento con gráficos</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="visualization" class="tab-content">
+                <h3>📊 Sistema de Visualización</h3>
+                <div class="code-block" data-lang="Python">
+def mostrar_grafico(self):
+    # Crear gráfico con matplotlib
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    
+    # Gráfico 1: Predicciones vs Reales
+    ax1.scatter(self.calculator.imc_data, predicciones)
+    ax1.plot([min_imc, max_imc], [min_imc, max_imc], 'r--')
+    ax1.set_title('Predicciones vs Valores Reales')
+    
+    # Gráfico 2: Distribución de errores
+    ax2.hist(errores, bins=10, alpha=0.7)
+    ax2.set_title('Distribución de Errores')
+    
+    # Integrar en tkinter
+    canvas = FigureCanvasTkAgg(fig, self.frame_plot)</div>
+                
+                <p><strong>Tipos de visualización:</strong></p>
+                <ul style="font-size: 1.1em; margin-left: 20px;">
+                    <li>📈 <strong>Scatter plot:</strong> Predicciones vs valores reales</li>
+                    <li>📊 <strong>Histograma:</strong> Distribución de errores</li>
+                    <li>📋 <strong>Tabla interactiva:</strong> Datos de entrenamiento</li>
+                    <li>🎯 <strong>Métricas en tiempo real:</strong> MAE, MSE, R²</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Métricas de Evaluación -->
+        <section class="section">
+            <div class="section-header">
+                <i class="fas fa-chart-line section-icon"></i>
+                <h2 class="section-title">Métricas de Evaluación</h2>
+            </div>
+            
+            <div class="metrics-display">
+                <div class="metric-card">
+                    <h3>MAE</h3>
+                    <span class="metric-value">< 1.0</span>
+                    <p>Error Absoluto Medio<br><strong>Excelente precisión</strong></p>
+                </div>
+                <div class="metric-card">
+                    <h3>MSE</h3>
+                    <span class="metric-value">< 2.0</span>
+                    <p>Error Cuadrático Medio<br><strong>Baja variabilidad</strong></p>
+                </div>
+                <div class="metric-card">
+                    <h3>R²</h3>
+                    <span class="metric-value">> 0.9</span>
+                    <p>Coeficiente de Determinación<br><strong>90% variabilidad explicada</strong></p>
+                </div>
+            </div>
+
+            <div class="responsive-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Descripción</th>
+                            <th>Interpretación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>MAE (Error Absoluto Medio)</strong></td>
+                            <td>Promedio de diferencias absolutas entre predicciones y valores reales</td>
+                            <td>&lt; 1.0 = Excelente, &lt; 2.0 = Bueno, &lt; 3.0 = Regular</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MSE (Error Cuadrático Medio)</strong></td>
+                            <td>Promedio de diferencias al cuadrado, penaliza errores grandes</td>
+                            <td>Menor valor = Mejor modelo</td>
+                        </tr>
+                        <tr>
+                            <td><strong>R² (Coeficiente de Determinación)</strong></td>
+                            <td>Proporción de variabilidad explicada por el modelo</td>
+                            <td>&gt; 0.9 = Excelente, &gt; 0.7 = Bueno</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Implementación Paso a Paso -->
+        <section class="section">
+            <div class="section-header">
+                <i class="fas fa-list-ol section-icon"></i>
+                <h2 class="section-title">Cómo Implementar</h2>
+            </div>
+            
+            <div class="implementation-steps">
+                <div class="implementation-step">
+                    <h4>Instalar Dependencias</h4>
+                    <div class="code-block" data-lang="bash">
+pip install matplotlib numpy
+# Tkinter viene incluido con Python</div>
+                </div>
+                
+                <div class="implementation-step">
+                    <h4>Ejecutar el Programa</h4>
+                    <div class="code-block" data-lang="bash">
+python bmi_ml_calculator.py</div>
+                </div>
+                
+                <div class="implementation-step">
+                    <h4>Agregar Datos de Entrenamiento</h4>
+                    <p>En la pestaña "Entrenamiento", ingresa altura y peso de diferentes personas. Necesitas mínimo 3 datos.</p>
+                </div>
+                
+                <div class="implementation-step">
+                    <h4>Entrenar el Modelo</h4>
+                    <p>Haz clic en "Entrenar Modelo" para que el algoritmo aprenda de los datos.</p>
+                </div>
+                
+                <div class="implementation-step">
+                    <h4>Hacer Predicciones</h4>
+                    <p>En la pestaña "Predicción", ingresa nuevos datos para ver qué tan bien predice el modelo.</p>
+                </div>
+                
+                <div class="implementation-step">
+                    <h4>Analizar Resultados</h4>
+                    <p>Revisa las métricas y gráficos en la pestaña "Métricas" para evaluar el rendimiento.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Características Técnicas -->
+        <section class="section">
+            <div class="section-header">
+                <i class="fas fa-microchip section-icon"></i>
+                <h2 class="section-title">Características Técnicas</h2>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-python"></i>
+                    <h3>Python Puro</h3>
+                    <p>Implementado completamente en Python sin librerías ML externas</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-memory"></i>
+                    <h3>Ligero</h3>
+                    <p>Algoritmo eficiente que no consume muchos recursos</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-sync"></i>
+                    <h3>Aprendizaje Incremental</h3>
+                    <p>Se actualiza automáticamente con cada nuevo dato</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-eye"></i>
+                    <h3>Interpretable</h3>
+                    <p>Ecuación del modelo visible y comprensible</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- GitHub Banner -->
+        <section class="github-banner">
+            <h2><i class="fab
