@@ -529,10 +529,10 @@
             </div>
 
             <div class="tabs">
-                <button class="tab active" onclick="showTab('class-structure')">Estructura de Clases</button>
-                <button class="tab" onclick="showTab('ml-algorithm')">Algoritmo ML</button>
-                <button class="tab" onclick="showTab('gui-interface')">Interfaz GUI</button>
-                <button class="tab" onclick="showTab('visualization')">Visualización</button>
+                <button class="tab active" onclick="showTab(event, 'class-structure')">Estructura de Clases</button>
+                <button class="tab" onclick="showTab(event, 'ml-algorithm')">Algoritmo ML</button>
+                <button class="tab" onclick="showTab(event, 'gui-interface')">Interfaz GUI</button>
+                <button class="tab" onclick="showTab(event, 'visualization')">Visualización</button>
             </div>
 
             <div id="class-structure" class="tab-content active">
@@ -946,7 +946,7 @@ python bmi_ml_calculator.py</div>
 
     <script>
         // Función para cambiar entre pestañas
-        function showTab(tabId) {
+        function showTab(event, tabId) {
             // Ocultar todas las pestañas
             const tabContents = document.querySelectorAll('.tab-content');
             tabContents.forEach(content => {
@@ -961,7 +961,7 @@ python bmi_ml_calculator.py</div>
             
             // Mostrar pestaña seleccionada
             document.getElementById(tabId).classList.add('active');
-            
+
             // Activar botón correspondiente
             event.target.classList.add('active');
         }
